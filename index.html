@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Pedidos de Estudiantes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css"
+        href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.12.1/datatables.min.css" />
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    
+    <link href="style.css" rel="stylesheet">
+</head>
+
+<body>
+    <h1 id="pageTitle">Ordenes</h1>
+
+    <body>
+        <div class="container">
+            <table class="table table-striped" id="ordersTable">
+            </table>
+        </div>
+
+        <script type="module">
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/9.9.0/firebase-app.js";
+            import { getFirestore, doc, getDoc, getDocs, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/9.9.0/firebase-firestore.js";
+
+            const firebaseConfig = {
+                apiKey: "AIzaSyBoaXZaSVTsP6P69_VApjjvT-jHhM0NXWo",
+                authDomain: "cafeteria-st-paul.firebaseapp.com",
+                databaseURL: "https://cafeteria-st-paul-default-rtdb.firebaseio.com",
+                projectId: "cafeteria-st-paul",
+                storageBucket: "cafeteria-st-paul.appspot.com",
+                messagingSenderId: "467227612415",
+                appId: "1:467227612415:web:7e951637edf623953e68ca",
+                measurementId: "G-SQLJEW26WG"
+            };
+
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore();
+            var dataSet = [];
+
+            function addItem(carne, details, date, hora, name, grade, platillo, order, interval) {
+                var obj = [carne, details, date, hora, name, grade, platillo, order, interval];
+                dataSet.push(obj);
+                console.log(obj);
+            }
+
+            $(document).ready(function () {
+                const querySnapshot = getDocs(collection(db, "orders2")).then(function (querySnapshot) {
+                    querySnapshot.forEach(function (doc) {
+                        const d = new Date();
+                        let currentDate = d.getTime() / 1000;
+                        if (doc.data().Interval > currentDate - 86400) { //86400 son la cantidad de segundos en un día
+                            addItem(doc.data().orderId, doc.data().details, doc.data().Carné, doc.data().Nombre, doc.data().Sección, doc.data().Platillo, doc.data().Date, doc.data().Hora,doc.data().Interval);
+                        }
+                    })
+                    $('#ordersTable').DataTable({
+                        data: dataSet,
+                        columns: [
+                            { title: 'Num. Orden' },
+                            { title: 'Detalles adic.' },
+                            { title: 'Carné' },
+                            { title: 'Nombre' },
+                            { title: 'Sección' },
+                            { title: 'Platillo' },
+                            { title: 'Fecha' },
+                            { title: 'Hora' },
+                            { title: 'Ordenar' }
+                        ],
+                        language: {
+                            search: "Buscar:",
+                            paginate: {
+                                first: "Primero",
+                                last: "Ultimo",
+                                next: "Sig.",
+                                previous: "Ant."
+                            },
+                            infoEmpty: "Mostrando 0 a 0 de 0 registros",
+                            zeroRecords: "No se han encontrado registros",
+                            info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                            infoFiltered: "(filtrado de _MAX_ registros)",
+                            loadingRecords: "Cargando...",
+                            lengthMenu: "Mostrando _MENU_ registros",
+                        },
+                    });
+                });
+            });
+        </script>
+        <script type="text/javascript" src="https://cdn.datatables.net/v/bs5/jq-3.6.0/dt-1.12.1/datatables.min.js"></script>
+
+    </body>
+</body>
+
+</html>
